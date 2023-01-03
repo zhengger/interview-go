@@ -5,45 +5,49 @@ import (
 	"sync"
 )
 
-func Print12AB(wait *sync.WaitGroup) {
-	letter, number := make(chan bool), make(chan bool)
-
-
+func Print12AB(number, letter chan bool, wait *sync.WaitGroup) {
+	// letter, number := make(chan bool), make(chan bool)
+	// wait.Add(1)
 	go printNumber(number, letter, wait)
 	go printLetter(number, letter, wait)
 	number <- true
+
 }
 
 var printNumber = func(number, letter chan bool, wait *sync.WaitGroup) {
-	wait.Add(1)
+	// defer wait.Done()
 	i := 1
 	for range number {
 		fmt.Print(i)
 		i++
 		fmt.Print(i)
+		i++
 		letter <- true
 	}
-	wait.Done()
+
 }
 
 var printLetter = func(number, letter chan bool, wait *sync.WaitGroup) {
-	wait.Add(1)
 	l := 'A'
+	// defer wait.Done()
 	for range letter {
-		if l > 'Z' {
-			fmt.Print("Done")
-			wait.Done()
-		}
 		fmt.Print(string(l))
 		l++
 		fmt.Print(string(l))
+		l++
+		if l >= 'Z' {
+			// fmt.Print("Done")
+			wait.Done()
+		}
 		number <- true
 	}
-	wait.Done()
+
 }
 
 func main() {
+	letter, number := make(chan bool), make(chan bool)
 	wait := sync.WaitGroup{}
-	Print12AB(&wait)
+	wait.Add(1)
+	Print12AB(letter, number, &wait)
 	wait.Wait()
 }
