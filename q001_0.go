@@ -8,15 +8,13 @@ import (
 func Print12AB() {
 	letter, number := make(chan bool), make(chan bool)
 	wait := sync.WaitGroup{}
-
 	go printNumber(number, letter, &wait)
 	go printLetter(number, letter, &wait)
 	number <- true
+	wait.Wait()
 }
 
 var printNumber = func(number, letter chan bool, wait *sync.WaitGroup) {
-	// wait.Add(1)
-	//
 	i := 1
 	for {
 		select {
@@ -24,7 +22,10 @@ var printNumber = func(number, letter chan bool, wait *sync.WaitGroup) {
 			fmt.Print(i)
 			i++
 			fmt.Print(i)
+			i++
 			letter <- true
+		default:
+			break
 		}
 	}
 }
@@ -36,18 +37,17 @@ var printLetter = func(number, letter chan bool, wait *sync.WaitGroup) {
 		select {
 		case <-letter:
 			if l >= 'Z' {
-				fmt.Print("Done")
+				// fmt.Print("Done")
 				wait.Done()
+				break
 			}
 			fmt.Print(string(l))
 			l++
 			fmt.Print(string(l))
+			l++
 			number <- true
+		default:
+			break
 		}
 	}
-}
-
-func main() {
-	Print12AB()
-	// time.Sleep(3 * time.Second)
 }
