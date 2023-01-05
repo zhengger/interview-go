@@ -16,6 +16,7 @@ func Print12AB() {
 
 var printNumber = func(number, letter chan bool, wait *sync.WaitGroup) {
 	i := 1
+OuterLoop:
 	for {
 		select {
 		case <-number:
@@ -25,7 +26,7 @@ var printNumber = func(number, letter chan bool, wait *sync.WaitGroup) {
 			i++
 			letter <- true
 		default:
-			break
+			break OuterLoop
 		}
 	}
 }
@@ -33,11 +34,12 @@ var printNumber = func(number, letter chan bool, wait *sync.WaitGroup) {
 var printLetter = func(number, letter chan bool, wait *sync.WaitGroup) {
 	wait.Add(1)
 	l := 'A'
+OuterLoop:
 	for {
 		select {
 		case <-letter:
 			if l >= 'Z' {
-				// fmt.Print("Done")
+				fmt.Print("Done")
 				wait.Done()
 				break
 			}
@@ -47,7 +49,7 @@ var printLetter = func(number, letter chan bool, wait *sync.WaitGroup) {
 			l++
 			number <- true
 		default:
-			break
+			break OuterLoop
 		}
 	}
 }
